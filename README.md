@@ -2,45 +2,43 @@
 
 ## Base Project
 
-This project extends **Game Glitch Investigator** (Module 1), a Streamlit-based
-number-guessing game that was originally delivered with several AI-generated
-bugs — swapped hint directions, a secret value that intermittently got
+This project extends **Game Glitch Investigator** (Module 1), a 
+number-guessing game that was delivered with several AI-generated
+bugs, swapped hint directions, a secret value that got
 converted to a string, and a scoring function that awarded points on wrong
-guesses. The original project's goal was to practice diagnosing, explaining,
+guesses. The original project's task was to practice diagnosing, explaining,
 and repairing AI-generated code using an AI coding assistant. All three bugs
-were identified and fixed in that submission.
+were fixed in that submission.
 
 ## Title and Summary
 
 **Glitchy Guesser: Autonomous Agent Edition** adds an autonomous AI agent that
 plays the guessing game on its own, using a binary-search strategy, and
-verifies every hint it receives against its own internal guardrail before
-trusting it. This matters because it turns a simple bug-fixing exercise into a
-demonstration of **trustworthy AI behavior**: an agent that not only acts, but
-checks whether the information it's given is even logically possible before
-acting on it — and reports when it isn't.
+verifies every hint it receives against its own guardrail before trusting it. 
+This matters because it turns a simple exercise into an AI agent that not only acts, but
+checks whether the information it's given is even logically possible before acting on it.
 
 ## Architecture Overview
 
-See [`diagrams/architecture.mmd`](diagrams/architecture.mmd) for the full
-Mermaid source.
+See [`diagrams/architecture.mmd`](diagrams/architecture.mmd).
 
 The system has four main parts:
 
-- **Streamlit UI (`app.py`)** — the game interface, unchanged from Module 1
+- **Streamlit UI (`app.py`)**: the game interface, unchanged from Module 1
   except for one new button: "Let AI Agent Play."
-- **Agent (`agent.py`)** — a `GuessAgent` class that plans its next guess by
-  bisecting the current known range, submits it through the existing
+- **Agent (`agent.py`)**: a `GuessAgent` class that plans its next guess by
+  splitting the current known range, submits it through the existing
   `check_guess()` function, and checks the resulting hint for consistency
-  before updating its internal bounds.
-- **Guardrail** — before trusting any hint, the agent checks two things: (1)
-  is this hint even possible given the range it already knows about, and (2)
-  does narrowing the range using this hint produce an impossible state (i.e.
-  `low > high`)? Either failure is logged as an anomaly instead of silently
+  before updating its bounds.
+- **Guardrail**: before trusting any hint, the agent checks if
+  the hint is even possible given the range it already knows about, and whether
+   narrowing the range using this hint produces an impossible state (i.e.
+  `low > high`)? Failures are logged as an anomaly instead of silently
   trusted.
-- **Reliability log** — every guess, hint, and any anomalies are recorded in a
+
+- **Reliability log**: every guess, hint, and anomalies are recorded in a
   structured log (`GuessLogEntry`), which is what both the UI and the
-  reliability test suite read from.
+  reliability test program reads from.
 
 Data flow: **UI → Agent (plan) → `logic_utils.check_guess()` (act) → Guardrail
 (check) → updated range → back to Agent for the next guess**, until a win or
@@ -58,7 +56,7 @@ python -m streamlit run app.py
 Then click **"Let AI Agent Play"** to watch the agent play a full game
 automatically, or play manually as in the original Module 1 version.
 
-To run the automated reliability suite (20 trials) directly from the command
+For running thethe automated reliability suite (20 trials) from the command
 line:
 
 ```bash
@@ -90,9 +88,8 @@ Attempt 7: guessed 17 → Win (range was (17, 17) → (17, 17))
 ✅ No guardrail anomalies — all hints were consistent
 ```
 
-**Run 3 — guardrail catching a deliberately reintroduced bug**
-(see `test_guardrail_demo.py`; this is not part of normal gameplay, it's a
-reliability test):
+**Run 3, guardrail catching a deliberately reintroduced bug**
+(a test program, `test_guardrail_demo.py` was used as a reliability test, it's not part of normal gameplay):
 ```
 === Case 2: intermittently corrupted hints (guardrail catches it) (secret=13) ===
 Attempt 1: guessed 50 -> Too High (range (1, 100) -> (1, 49))
@@ -110,19 +107,17 @@ Won: False | Anomalies detected: 2
 
 ## Design Decisions
 
-- **Binary search over random/naive guessing**: guarantees the fastest
-  possible convergence given consistent hints, and makes any deviation from
-  expected narrowing easy to notice and test.
+- **Binary search over random/naive guessing** guarantees the fastest
+  possible solution given consistent hints, and makes narrowing easy to notice and test.
 - **Guardrail checks bound validity, not just single-hint plausibility**:
   the first version of the guardrail only checked whether a single hint was
   individually possible. Testing showed this missed cases where a hint
   looked fine on its own but made the tracked range logically impossible
   once combined with earlier hints. Adding a check for `low > high` after
-  narrowing closed that gap. Trade-off: this means an anomaly is sometimes
-  detected one attempt *after* the actual bad hint occurred, rather than
-  the instant it happens — catching it early would require re-deriving the
-  "true" hint from the actual secret, which the agent isn't given access to
-  (it only sees what a human player would see).
+  narrowing closed that gap. However, this means an anomaly is sometimes
+  detected one attempt after the actual bad hint occurred, rather than
+  the instant it happens. Finding it early would require re-deriving the
+  "true" hint from the actual secret, which the agent isn't given access to.
 - **Reusing `logic_utils.py` unchanged**: the agent calls the same
   `check_guess`, `parse_guess`, and `update_score` functions a human player
   uses, rather than reimplementing game logic. This keeps a single source of
@@ -144,9 +139,8 @@ total_anomalies: 0
 
 All 20 trials passed with zero guardrail anomalies, confirming the current
 `logic_utils.py` gives consistent, non-contradictory hints. Separately, the
-guardrail was validated against two deliberately reintroduced bug patterns
-(see `test_guardrail_demo.py`): a systematically swapped hint direction and
-an intermittently corrupted hint. Both were eventually caught by the
+guardrail was validated against two reintroduced bug patterns, a swapped hint direction and
+an corrupted hint. Both were eventually caught by the
 invalid-range check, though the systematic swap wasn't caught until the range
-had nearly collapsed — a known limitation noted above and in
+had nearly collapsed, which is a known limitation in
 `model_card.md`.
