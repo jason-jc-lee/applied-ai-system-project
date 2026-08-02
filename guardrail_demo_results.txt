@@ -1,0 +1,26 @@
+=== Case 1: consistently swapped hints (bug present, guardrail blind to it) (secret=13) ===
+Attempt 1: guessed 50 -> Too Low (range (1, 100) -> (51, 100))
+Attempt 2: guessed 75 -> Too Low (range (51, 100) -> (76, 100))
+Attempt 3: guessed 88 -> Too Low (range (76, 100) -> (89, 100))
+Attempt 4: guessed 94 -> Too Low (range (89, 100) -> (95, 100))
+Attempt 5: guessed 97 -> Too Low (range (95, 100) -> (98, 100))
+Attempt 6: guessed 99 -> Too Low (range (98, 100) -> (100, 100))
+Attempt 7: guessed 100 -> Too Low (range (100, 100) -> (101, 100)) <-- FLAGGED BY GUARDRAIL
+Attempt 8: guessed 100 -> Too Low (range (101, 100) -> (101, 100)) <-- FLAGGED BY GUARDRAIL
+Won: False | Anomalies detected: 2
+ - Attempt 7: guess=100 outcome=Too Low -> After narrowing, range became invalid (101 > 100). A prior hint must have been wrong.
+ - Attempt 8: guess=100 outcome=Too Low -> After narrowing, range became invalid (101 > 100). A prior hint must have been wrong.
+
+=== Case 2: intermittently corrupted hints (guardrail catches it) (secret=13) ===
+Attempt 1: guessed 50 -> Too High (range (1, 100) -> (1, 49))
+Attempt 2: guessed 25 -> Too Low (range (1, 49) -> (26, 49))
+Attempt 3: guessed 37 -> Too High (range (26, 49) -> (26, 36))
+Attempt 4: guessed 31 -> Too Low (range (26, 36) -> (32, 36))
+Attempt 5: guessed 34 -> Too High (range (32, 36) -> (32, 33))
+Attempt 6: guessed 32 -> Too Low (range (32, 33) -> (33, 33))
+Attempt 7: guessed 33 -> Too High (range (33, 33) -> (33, 32)) <-- FLAGGED BY GUARDRAIL
+Attempt 8: guessed 32 -> Too Low (range (33, 32) -> (33, 32)) <-- FLAGGED BY GUARDRAIL
+Won: False | Anomalies detected: 2
+ - Attempt 7: guess=33 outcome=Too High -> After narrowing, range became invalid (33 > 32). A prior hint must have been wrong.
+ - Attempt 8: guess=32 outcome=Too Low -> After narrowing, range became invalid (33 > 32). A prior hint must have been wrong.
+
