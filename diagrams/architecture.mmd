@@ -1,0 +1,11 @@
+flowchart TD
+    A[Streamlit UI<br/>app.py] --> B[Game State<br/>secret, bounds, history]
+    B --> C[Agent Player<br/>agent.py]
+    C --> D[Guess Strategy<br/>binary search logic]
+    D --> E[logic_utils.py<br/>check_guess]
+    E --> F{Guardrail Check<br/>hint consistent?}
+    F -->|Consistent| G[Update Game State]
+    F -->|Contradiction| H[Flag & Log Anomaly]
+    G --> C
+    H --> I[Reliability Log<br/>test_results / logs]
+    G --> J[Game Result<br/>win/loss + score]
