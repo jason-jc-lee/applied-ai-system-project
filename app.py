@@ -1,5 +1,6 @@
 import random
 import streamlit as st
+from agent import GuessAgent
 from logic_utils import check_guess, parse_guess, get_range_for_difficulty, update_score
 
 # def get_range_for_difficulty(difficulty: str):
@@ -134,6 +135,24 @@ with col2:
     new_game = st.button("New Game 🔁")
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
+
+auto_play = st.button("🤖 Let AI Agent Play")
+
+if auto_play:
+    agent = GuessAgent(low, high, attempt_limit)
+    result = agent.play(st.session_state.secret, starting_score=st.session_state.score)
+    st.session_state.attempts = result.attempts_used
+    st.session_state.score = result.final_score #compute results
+    st.session_state.status = "won" if result.won else "lost"
+    for entry in result.log:
+        st.write(f"Attempt {entry.attempt}: guessed {entry.guess} → {entry.outcome} "
+                  f"(range was {entry.bounds_before} → {entry.bounds_after})")
+    if result.anomalies:
+        st.error(f"⚠️ {len(result.anomalies)} guardrail anomalies detected")
+        for a in result.anomalies:
+            st.write("-", a)
+    else:
+        st.success("✅ No guardrail anomalies — all hints were consistent")
 
 if new_game:
     st.session_state.attempts = 0
