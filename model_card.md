@@ -1,75 +1,63 @@
 # Model Card: Glitchy Guesser Autonomous Agent
 
-This document reflects on the limitations, risks, and AI-collaboration process
-behind the `GuessAgent` built for this project. It is separate from
-`README.md`, which covers what the system does and how to run it.
+This document talks about the limitations, risks, and AI-collaboration process
+for the `GuessAgent` class in this project. It covers the limitations, risks, and how AI
+assistance was used during development.
 
 ## Limitations and Biases
 
-The agent's guardrail is designed to catch **logical inconsistency**, not
-**correctness**. During testing, a version of `check_guess` was created that
+The guardrail is designed to catch inconsistencies. During testing, a version of `check_guess` was created that
 swapped "Too High" and "Too Low" on every single call. Because the swap was
-applied consistently, every hint stayed internally consistent with the last —
-the agent's tracked range never contradicted itself, it just steadily narrowed
+applied consistently, every hint stayed internally consistent, and steadily narrowed
 in the wrong direction until it ran out of attempts. The guardrail only
-detected a problem once the range became mathematically invalid
-(`low > high`), and even then, only after several attempts had already passed
-with confidently wrong guesses.
+detected a problem once the range became invalid
+(`low > high`). The guardrail only caught the problem after several attempts had already passed with confidently wrong guesses.
 
-This means the guardrail is better at catching **intermittent or partial**
-corruption than a **fully systematic** bias. A hint source that is wrong in
-exactly the same way every time can look trustworthy for a surprisingly long
-time. This is a real limitation, not just a hypothetical one: it directly
-mirrors how a subtly biased AI system can seem reliable if its errors are
+This means the guardrail is better at catching hints that sometimes contradict each other, but
+it struggles to catch bugs that are wrong every single time. This is due to consistent lies never 
+contradicting themselves. A hint source that is wrong in
+exactly the same way every time can look trustworthy for a long
+time. This is a limitation that shows how an AI system can seem reliable if its errors are
 consistent rather than random.
 
-The agent's strategy (binary search) also assumes the *underlying game* is
-well-behaved — a range that can be cleanly bisected. It would not generalize
-to a fundamentally different kind of game logic without rework.
+The agent's strategy (binary search) only works well for the number-guessing game. If this logic
+was applied to a different game, it would not work well.
 
 ## Potential Misuse and Mitigation
 
-This is a low-stakes educational project, so the direct misuse risk is small.
-That said, the general pattern is worth naming: an agent could be presented as
-"guardrail-verified" or "reliability-tested" based on a suite that only checks
-for one narrow failure mode (self-contradiction), which could create false
-confidence in a system that still has a systematic, undetected bias. The
-mitigation used here is running the agent against **deliberately reintroduced
-bugs** (see `test_guardrail_demo.py`), not just clean runs — a reliability
-claim is only meaningful if you've also tried to make it fail.
+The possibility of misuse is small, and the pattern that the AI uses is designed to check for 
+one specific kind of error, the error of hints contradicting each other.
+This means that a hint that may be wrong could be interpreted as right by the system, leading into wrong answers. 
+The mitigation here is the results that may be a failure. So, claiming the system is "reliable" may not be true as
+it might have not accounted for countless other cases.
+
+The mitigation is that the version of the game was given a known bug to determine if 
+the guardrail would actually check. This led to cases where it worked and didn't work, 
+which is a more honest test.
 
 ## What Surprised Me During Reliability Testing
 
-The first version of the guardrail passed all 20 clean-run trials with zero
+The first version of the guardrail passed all 20 trials with zero
 anomalies, which looked like strong evidence it worked. It was only when a
-known-broken version of `check_guess` was deliberately substituted in as a
-test that a real gap showed up: a systematically wrong hint pattern produced
-**zero flagged anomalies** on the first guardrail design, even though the
-agent never won a single game against it. Passing all your tests only shows
-your guardrail didn't fire on the inputs you happened to test — it does not
-show it would catch every kind of failure. That distinction was the biggest
-surprise of the reliability testing process.
+known broken version of `check_guess` was deliberately substituted in that it showed a 
+wrong hint pattern producing zero flagged anomalies, even though the
+agent never won a single game against it. Passing all the tests only shows
+the guardrail didn't fire on the inputs that were being tested; it does not
+show it would catch every kind of failure.
 
 ## AI Collaboration
 
-**A flawed suggestion:** the first guardrail design (built with AI assistance)
+**Flawed suggestion:** the first guardrail design was built with the assistance of AI. It
 only checked whether a single hint was individually plausible given the
 agent's current tracked range. This looked reasonable and passed all initial
-clean-run tests, but it failed to catch a real bug pattern — a consistently
-swapped hint direction — because that pattern never produced a hint that was
-implausible *on its own*, only a range that became invalid after several
+clean-run tests, but it failed to catch a consistently
+swapped hint direction because that pattern never produced a hint that was
+implausible on its own, only that range became invalid after several
 guesses accumulated. I verified this by running the agent against a
 deliberately broken `check_guess` and observing zero anomalies where there
 clearly should have been some.
 
-**A helpful correction:** once that gap was identified, the fix — checking
-whether the range became invalid (`low > high`) after narrowing, rather than
-only checking each hint in isolation — was suggested and correctly resolved
-the issue. Re-running both the clean 20-trial suite and the deliberately
-broken test cases confirmed the fix worked without introducing false
+**Helpful suggestion:** once that gap was identified, the fix was to check whether the range became invalid (low > high) after narrowing, rather than only checking each hint in isolation. This correctly resolved the issue. Re-running both the clean runs and the deliberately broken test cases confirmed the fix worked without introducing false
 positives on legitimate games.
 
-The overall lesson: AI-suggested guardrails and tests can look sufficient
-while quietly missing an entire failure mode, and the only way to find that
-out is to deliberately test against known-bad inputs rather than trusting a
-clean run.
+AI-suggested guardrails and tests can look sufficient while quietly missing a real failure. The only way to find out is to deliberately test against bad inputs rather than trust a clean run.
