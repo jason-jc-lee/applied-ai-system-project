@@ -155,8 +155,10 @@ if auto_play:
         st.success("✅ No guardrail anomalies — all hints were consistent")
 
 if new_game:
+    st.session_state.score = 0
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(1, 100)
+    st.session_state.status = "playing" #allows manual play to return
     st.success("New game started.")
     st.rerun()
 

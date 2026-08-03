@@ -20,6 +20,10 @@ exactly the same way every time can look trustworthy for a long
 time. This is a limitation that shows how an AI system can seem reliable if its errors are
 consistent rather than random.
 
+Testing also allowed me to notice and fix two bugs, being status and score not being reset when starting a new game, which caused score inaccuracies and blocked further play.
+
+In addition, the agent is incapable of playing where the manual plays left off. Instead, the agent will do all the guesswork from scratch and will not take the manual guesses into account. A completed version would track the ranges across both manual and agent guesses.
+
 The agent's strategy (binary search) only works well for the number-guessing game. If this logic
 was applied to a different game, it would not work well.
 
@@ -64,4 +68,4 @@ AI-suggested guardrails and tests can look sufficient while quietly missing a re
 
 ## Future Improvements
 
-A future version of this guardrail could work by comparing hints against the secret value directly rather than checking for contradiction. While this would catch wrong hint patterns immediately rather than later on, it would only be possible during a test run, rather than an actual run since the agent isn't supposed to cheat. Another improvement would be to track the count of consecutive same-direction (constantly going higher/lower) hints, as scenarios like these are usually signs of errors. 
+A future version of this guardrail could work by comparing hints against the secret value directly rather than checking for contradiction. While this would catch wrong hint patterns immediately rather than later on, it would only be possible during a test run, rather than an actual run since the agent isn't supposed to cheat. Another improvement would be to track the count of consecutive same-direction (constantly going higher/lower) hints, as scenarios like these are usually signs of errors. Additionally, the agent may take into account of where manual plays have left off and work from there.
