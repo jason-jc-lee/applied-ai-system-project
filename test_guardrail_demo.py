@@ -11,9 +11,6 @@ but never triggered.
 
 Do NOT import this into app.py. Run it standalone:
     python test_guardrail_demo.py
-
-Paste the output into your README's reliability/testing section as
-evidence the guardrail works.
 """
 
 from agent import GuessAgent
