@@ -61,3 +61,7 @@ clearly should have been some.
 positives on legitimate games.
 
 AI-suggested guardrails and tests can look sufficient while quietly missing a real failure. The only way to find out is to deliberately test against bad inputs rather than trust a clean run.
+
+## Future Improvements
+
+A future version of this guardrail could work by comparing hints against the secret value directly rather than checking for contradiction. While this would catch wrong hint patterns immediately rather than later on, it would only be possible during a test run, rather than an actual run since the agent isn't supposed to cheat. Another improvement would be to track the count of consecutive same-direction (constantly going higher/lower) hints, as scenarios like these are usually signs of errors. 
