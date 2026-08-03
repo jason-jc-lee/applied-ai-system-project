@@ -20,7 +20,7 @@ exactly the same way every time can look trustworthy for a long
 time. This is a limitation that shows how an AI system can seem reliable if its errors are
 consistent rather than random.
 
-Testing also allowed me to notice and fix two bugs, being status and score not being reset when starting a new game, which caused score inaccuracies and blocked further play.
+Testing also allowed me to notice and fix two bugs, being status and score not being properly reset when starting a new game, which caused score inaccuracies and blocked further play.
 
 In addition, the agent is incapable of playing where the manual plays left off. Instead, the agent will do all the guesswork from scratch and will not take the manual guesses into account. A completed version would track the ranges across both manual and agent guesses.
 
