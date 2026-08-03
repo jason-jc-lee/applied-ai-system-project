@@ -1,0 +1,13 @@
+Portfolio Artifact — Applied AI System Project
+Jason Lee
+
+GitHub Repository:
+https://github.com/jason-jc-lee/applied-ai-system-project
+
+Reflection: 
+What this project says about me as an AI engineer.
+
+This project taught me that "it passed all the tests" and "it actually
+works" are not the same claim. I built a guardrail that seemed reliable as it passed 20 out of 20 clean trials with zero anomalies. However, when I
+intentionally fed it a known bug to test it on purpose, it missed a
+systematic (wrong every single time in the same way) error entirely. That made me rethink what the guardrail was actually checking for (contradictions) versus what I assumed (correctness). This project showed me that correctness isn't the only thing that matters, but it's to actively try to disprove my own assumptions before coming to conclusions.
